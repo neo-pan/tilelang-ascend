@@ -98,9 +98,9 @@ def copy_source_slice(M, N, src_pitch, dst_pitch, col, dtype, atomic):
             a_ub = T.alloc_ub((M + 2, src_pitch), dtype)
             T.tile.arith_progression(a_ub, 0.0, 1.0, (M + 2) * src_pitch)
             if atomic:
-                T.tile.atomic_add(B[0:M, 0:N], a_ub[1:M + 1, col:col + N])
+                T.tile.atomic_add(B[0:M, 0:N], a_ub[1 : M + 1, col : col + N])
             else:
-                T.copy(a_ub[1:M + 1, col:col + N], B[0:M, 0:N])
+                T.copy(a_ub[1 : M + 1, col : col + N], B[0:M, 0:N])
 
     return main
 
@@ -128,7 +128,7 @@ def test_copy_ub_source_slice(N, src_pitch, dst_pitch, col, dtype, atomic):
     values = torch.arange((M + 2) * src_pitch, dtype=td).reshape(M + 2, src_pitch)
     expected = torch.full((M, dst_pitch), -3, dtype=td)
     # Both vector cores execute the body, so atomic adds each element twice.
-    expected[:, :N] = values[1:M + 1, col:col + N] * (2 if atomic else 1)
+    expected[:, :N] = values[1 : M + 1, col : col + N] * (2 if atomic else 1)
     if atomic:
         expected[:, :N] -= 3
     assert torch.equal(output.cpu(), expected)

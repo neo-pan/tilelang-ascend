@@ -27,7 +27,7 @@ using namespace tir;
 namespace {
 
 PrimExpr GetUBCopyRowPitch(const Buffer &buf, const Array<PrimExpr> &extents,
-                          const LowerArgs &T, arith::Analyzer *analyzer) {
+                           const LowerArgs &T, arith::Analyzer *analyzer) {
   // The DMA template describes physical row spacing, not the copied region's
   // width. Follow the same layout/remap path as the source pointer so slices,
   // explicit strides and padded layouts all retain their backing storage pitch.
@@ -39,8 +39,8 @@ PrimExpr GetUBCopyRowPitch(const Buffer &buf, const Array<PrimExpr> &extents,
   }
   auto physical = T.buffer_remap.count(buf) ? T.buffer_remap[buf] : buf;
   auto offset = [&](const Array<PrimExpr> &logical) {
-    auto mapped = T.layout_map.count(buf) ? T.layout_map[buf]->Forward(logical)
-                                        : logical;
+    auto mapped =
+        T.layout_map.count(buf) ? T.layout_map[buf]->Forward(logical) : logical;
     return physical.OffsetOf(mapped).back();
   };
   PrimExpr base = offset(indices);
@@ -67,7 +67,8 @@ PrimExpr GetUBCopyRowPitch(const Buffer &buf, const Array<PrimExpr> &extents,
   pitch = analyzer->Simplify(pitch);
   const auto *constant = pitch.as<IntImmNode>();
   ICHECK(constant && constant->value > 0)
-      << "UB copy requires a positive compile-time row pitch, but got " << pitch;
+      << "UB copy requires a positive compile-time row pitch, but got "
+      << pitch;
   return pitch;
 }
 
